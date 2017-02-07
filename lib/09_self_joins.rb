@@ -174,34 +174,74 @@ def start_at_craiglockhart
   SQL
 end
 
+# def craiglockhart_to_sighthill
+#   # Find the routes involving two buses that can go from Craiglockhart to
+#   # Sighthill. Show the bus no. and company for the first bus, the name of the
+#   # stop for the transfer, and the bus no. and company for the second bus.
+#   execute(<<-SQL)
+#     SELECT DISTINCT
+#       bus1.num, bus1.company, transfer.name, bus2.num, bus2.company
+#     FROM
+#       routes bus1
+#     JOIN
+#       routes AS to_transfer ON bus1.company = to_transfer.company
+#         AND bus1.num = to_transfer.num
+#     JOIN
+#       stops AS transfer ON to_transfer.stop_id = transfer.id
+#     JOIN
+#       routes AS from_transfer ON transfer.id = from_transfer.stop_id
+#     JOIN
+#       routes AS bus2 ON from_transfer.company = bus2.company
+#         AND from_transfer.num = bus2.num
+#     WHERE
+#       bus1.stop_id = (
+#         SELECT
+#           id
+#         FROM
+#           stops
+#         WHERE
+#           name = 'Craiglockhart'
+#       ) AND bus2.stop_id = (
+#         SELECT
+#           id
+#         FROM
+#           stops
+#         WHERE
+#           name = 'Sighthill'
+#       );
+#   SQL
+# end
+
 def craiglockhart_to_sighthill
   # Find the routes involving two buses that can go from Craiglockhart to
   # Sighthill. Show the bus no. and company for the first bus, the name of the
   # stop for the transfer, and the bus no. and company for the second bus.
   execute(<<-SQL)
     SELECT DISTINCT
-      bus1.num, bus1.company, transfer.name, bus2.num, bus2.company
+      start.num,
+      start.company,
+      transfer.name,
+      finish.num,
+      finish.company
     FROM
-      routes bus1
+      routes AS start
     JOIN
-      routes AS to_transfer ON bus1.company = to_transfer.company
-        AND bus1.num = to_transfer.num
+      routes AS to_transfer ON start.num = to_transfer.num AND start.company = to_transfer.company
     JOIN
       stops AS transfer ON to_transfer.stop_id = transfer.id
     JOIN
       routes AS from_transfer ON transfer.id = from_transfer.stop_id
     JOIN
-      routes AS bus2 ON from_transfer.company = bus2.company
-        AND from_transfer.num = bus2.num
+      routes AS finish ON from_transfer.company = finish.company AND from_transfer.num = finish.num
     WHERE
-      bus1.stop_id = (
+      start.stop_id = (
         SELECT
           id
         FROM
           stops
         WHERE
           name = 'Craiglockhart'
-      ) AND bus2.stop_id = (
+      ) AND finish.stop_id = (
         SELECT
           id
         FROM
